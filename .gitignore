@@ -6,6 +6,15 @@
 # Folders
 _obj
 _test
+public/js/angular/*
+public/js/jasmine/*
+
+# Files
+!public/js/jasmine/SpecRunner.html
+!public/js/angular/angular.js
+!public/js/angular/angular-mocks.js
+!public/js/angular/angular-route.js
+!public/js/angular/angular-resource.js
 
 # Architecture specific extensions/prefixes
 *.[568vq]
