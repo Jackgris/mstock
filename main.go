@@ -7,6 +7,7 @@ import (
 
 func main() {
 	m := martini.Classic()
+	// We change the limiters to avoid problems with AngularJs
 	m.Use(render.Renderer(render.Options{
 		Delims: render.Delims{"<<<", ">>>"},
 	}))
