@@ -12,7 +12,7 @@ import (
 
 // This is gonna be our server
 type Server struct {
-	*http.ServeMux
+	http.Server
 }
 
 // This server will only serve to respond to requests for static files,
@@ -26,27 +26,26 @@ var templates = template.Must(template.ParseFiles("templates/home.html"))
 // access our server
 var validPath = regexp.MustCompile("^/(auth)/([a-zA-Z0-9]+)$")
 
-func main() {
-	// only we create and launch the server
-	server := NewServer()
-	server.Run()
-}
-
 // NewServer it will create a server with all necessary
 // settings to function properly
 func NewServer() *Server {
 	sm.Handle("/", http.FileServer(http.Dir("./public/")))
-	s := new(Server)
-	s.ServeMux = http.NewServeMux()
+	s := http.NewServeMux()
 	s.HandleFunc("/auth/login", makeHandler(controllers.LoginHandler))
 	s.HandleFunc("/auth/signup", makeHandler(controllers.RegisterHandler))
 	s.HandleFunc("/", HomeHandler)
-	return s
+
+	server := new(Server)
+	server.Server = http.Server{
+		Addr:    ":8080",
+		Handler: s,
+	}
+	return server
 }
 
 // Will run the server
 func (s *Server) Run() {
-	http.ListenAndServe(":8080", s)
+	s.ListenAndServe()
 }
 
 // We use this function to verify that the route of the
@@ -78,4 +77,10 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
+}
+
+func main() {
+	// only we create and launch the server
+	server := NewServer()
+	server.Run()
 }
