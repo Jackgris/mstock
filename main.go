@@ -17,7 +17,7 @@ type Server struct {
 
 // This server will only serve to respond to requests for static files,
 // and we will add to our main server
-var sm = http.NewServeMux()
+var sm *http.ServeMux
 
 // We will compile our templates one Time
 var templates = template.Must(template.ParseFiles("templates/home.html"))
@@ -29,6 +29,7 @@ var validPath = regexp.MustCompile("^/(auth)/([a-zA-Z0-9]+)$")
 // NewServer it will create a server with all necessary
 // settings to function properly
 func NewServer() *Server {
+	sm = http.NewServeMux()
 	sm.Handle("/", http.FileServer(http.Dir("./public/")))
 	s := http.NewServeMux()
 	s.HandleFunc("/auth/login", makeHandler(controllers.LoginHandler))
