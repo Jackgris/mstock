@@ -9,6 +9,10 @@ import (
 	"github.com/dgrijalva/jwt-go"
 )
 
+// This var go to verify if the data needed for create token has valid characters
+var re = regexp.MustCompile("[\\w!#$%&'*+/=?^_`{|}~-]+(?:\\.[\\w!#$%&'*+/=?^_`{|}~-]+)*@(?:[\\w](?:[\\w-]*[\\w])?\\.)+[a-zA-Z0-9](?:[\\w-]*[\\w])?")
+
+// With this data we could authentic the user
 type Token struct {
 	Hash   string
 	Expire time.Time
@@ -35,7 +39,6 @@ func GenerateToken(d ...interface{}) (Token, error) {
 		}
 	}
 
-	re := regexp.MustCompile("[\\w!#$%&'*+/=?^_`{|}~-]+(?:\\.[\\w!#$%&'*+/=?^_`{|}~-]+)*@(?:[\\w](?:[\\w-]*[\\w])?\\.)+[a-zA-Z0-9](?:[\\w-]*[\\w])?")
 	ok = re.MatchString(data)
 	if !ok {
 		return Token{}, errors.New("invalid data, you can not create the token")
