@@ -33,7 +33,7 @@ func defineFactories() {
 		})
 	gory.Define("userBad", models.User{},
 		func(factory gory.Factory) {
-			factory["IdUser"] = "esto1234es12una44prueba"
+			factory["IdUser"] = "esto4es4una4mala4prueba"
 			factory["Name"] = "Juan123"
 			factory["Pass"] = "asdasf1231@@24sdmk09i0342"
 			factory["Email"] = "estonoesunmailcom"

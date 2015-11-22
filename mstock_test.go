@@ -3,10 +3,13 @@ package main_test
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
+	"io"
 	"net/http"
 	"net/http/httptest"
 
 	mstock "github.com/jackgris/mstock"
+	models "github.com/jackgris/mstock/models"
 	"github.com/modocache/gory"
 
 	"github.com/onsi/ginkgo"
@@ -53,9 +56,20 @@ var _ = ginkgo.Describe("Mstock", func() {
 						bytes.NewReader(body))
 				})
 
-				It("return a status code of 400", func() {
+				It("Return a status code of 400", func() {
 					server.Handler.ServeHTTP(recorder, request)
 					Expect(recorder.Code).To(gomega.Equal(400))
+				})
+
+				It("User must not be saved in the database", func() {
+					user := gory.Build("userBad").(*models.User)
+					userTest := models.User{
+						IdUser: user.IdUser,
+					}
+					userTest, err := userTest.Get()
+					errTest := errors.New("not found")
+					Expect(err).To(gomega.Equal(errTest))
+					Expect(userTest).To(gomega.BeZero())
 				})
 			})
 
@@ -67,14 +81,44 @@ var _ = ginkgo.Describe("Mstock", func() {
 						bytes.NewReader(body))
 				})
 
-				It("return a status code of 200", func() {
+				It("Return a status code of 200", func() {
 					server.Handler.ServeHTTP(recorder, request)
 					Expect(recorder.Code).To(gomega.Equal(200))
+				})
+
+				It("User must be saved in the database", func() {
+					user := gory.Build("userOk").(*models.User)
+					userTest := models.User{
+						IdUser: user.IdUser,
+					}
+					userTest, err := userTest.Get()
+
+					Expect(err).To(gomega.BeNil())
+					Expect(user.Name).To(gomega.Equal(userTest.Name))
+				})
+
+				It("Response need have hash token", func() {
+					server.Handler.ServeHTTP(recorder, request)
+					Expect(recorder.Code).To(gomega.Equal(200))
+					Expect(recorder.HeaderMap["Content-Type"][0]).
+						To(gomega.ContainSubstring("application/json; charset=UTF-8"))
+
+					data := myCloser{bytes.NewBufferString(recorder.Body.String())}
+					token, err := DecodeToken(data)
+					Expect(err).To(gomega.BeNil())
+					Expect(token).ShouldNot(gomega.BeZero())
 				})
 			})
 		})
 	})
 })
+
+func DecodeToken(r io.ReadCloser) (*models.Token, error) {
+	defer r.Close()
+	var t models.Token
+	err := json.NewDecoder(r).Decode(&t)
+	return &t, err
+}
 
 func NewSession(dburl string) *mgo.Session {
 	s, err := mgo.Dial(dburl)
@@ -83,3 +127,9 @@ func NewSession(dburl string) *mgo.Session {
 	}
 	return s
 }
+
+type myCloser struct {
+	io.Reader
+}
+
+func (myCloser) Close() error { return nil }

@@ -24,8 +24,10 @@ type User struct {
 	LastLogin time.Time `json:"last_login"`
 	CreatedAt time.Time `json:"create_at"`
 	UpdateAt  time.Time `json:"update"`
+	Token     Token
 }
 
+// We will check if the user data are valid
 func (u User) Valid() bool {
 	v := validation.Validation{}
 	v.Required(u.Name, "name")
@@ -35,6 +37,9 @@ func (u User) Valid() bool {
 	v.Email(u.Email, "email")
 
 	if v.HasErrors() {
+		for _, e := range v.Errors {
+			log.Println("Check valid user data:", e)
+		}
 		return false
 	}
 
@@ -67,7 +72,7 @@ func (u User) Get() (User, error) {
 	result := User{}
 	err = c.FindId(u.IdUser).One(&result)
 	if err != nil {
-		log.Fatalln("Get user", err)
+		log.Println("Get user", err)
 		return User{}, err
 	}
 	return result, err
