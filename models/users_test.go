@@ -1,9 +1,10 @@
 package models_test
 
 import (
+	"errors"
 	"time"
 
-	. "github.com/jackgris/mstock/models"
+	models "github.com/jackgris/mstock/models"
 
 	"github.com/onsi/ginkgo"
 	"github.com/onsi/gomega"
@@ -14,11 +15,12 @@ var _ = ginkgo.Describe("Users", func() {
 	Expect := gomega.Expect
 	Describe := ginkgo.Describe
 	It := ginkgo.It
+	Context := ginkgo.Context
 
 	Describe("Interacting with database", func() {
 
 		It("Saving or update data", func() {
-			user := User{
+			user := models.User{
 				IdUser:    "test1234",
 				Name:      "test",
 				Pass:      "1234",
@@ -32,7 +34,7 @@ var _ = ginkgo.Describe("Users", func() {
 		})
 
 		It("Get user with Id", func() {
-			user := User{
+			user := models.User{
 				IdUser: "test1234",
 			}
 
@@ -43,11 +45,25 @@ var _ = ginkgo.Describe("Users", func() {
 		})
 
 		It("Delete user with Id", func() {
-			user := User{
+			user := models.User{
 				IdUser: "test1234",
 			}
 			err := user.Delete()
 			Expect(err).To(gomega.BeNil())
+		})
+
+		Context("If user deleted", func() {
+			user := models.User{
+				IdUser: "test1234",
+			}
+
+			It("We need received zero value for user and error", func() {
+				user, err := user.Get()
+				errTest := errors.New("not found")
+				Expect(err).To(gomega.Equal(errTest))
+				Expect(user.Name).To(gomega.BeZero())
+				Expect(user.Pass).To(gomega.BeZero())
+			})
 		})
 	})
 })
