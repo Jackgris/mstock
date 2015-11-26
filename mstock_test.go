@@ -110,6 +110,18 @@ var _ = ginkgo.Describe("Mstock", func() {
 				})
 			})
 		})
+
+		Describe("POST /auth/login", func() {
+
+			Context("With invalid JSON", func() {
+
+			})
+
+			Context("With valid JSON", func() {
+
+			})
+
+		})
 	})
 })
 
