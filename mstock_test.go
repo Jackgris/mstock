@@ -5,8 +5,10 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
+	"log"
 	"net/http"
 	"net/http/httptest"
+	"time"
 
 	mstock "github.com/jackgris/mstock"
 	models "github.com/jackgris/mstock/models"
@@ -115,15 +117,75 @@ var _ = ginkgo.Describe("Mstock", func() {
 
 			Context("With invalid JSON", func() {
 
+				BeforeEach(func() {
+					user := models.User{}
+					body, _ := json.Marshal(user)
+					request, _ = http.NewRequest("POST", "/auth/login",
+						bytes.NewReader(body))
+				})
+
+				It("Response should be 400 with empty input", func() {
+					server.Handler.ServeHTTP(recorder, request)
+					Expect(recorder.Code).To(gomega.Equal(400))
+
+				})
+
+				It("Response should be 400 with wrong data", func() {
+					user := models.User{}
+					putCorrectDataUser(&user)
+					user.Name = "wrong"
+					user.IdUser = "doesn't exist"
+					user.Pass = "bad"
+
+					body, _ := json.Marshal(user)
+					request, _ = http.NewRequest("POST", "/auth/login",
+						bytes.NewReader(body))
+					server.Handler.ServeHTTP(recorder, request)
+					Expect(recorder.Code).To(gomega.Equal(404))
+				})
 			})
 
 			Context("With valid JSON", func() {
 
+				var user models.User
+				user = models.User{}
+				putCorrectDataUser(&user)
+				BeforeEach(func() {
+
+					body, _ := json.Marshal(user)
+					request, _ = http.NewRequest("POST", "/auth/login",
+						bytes.NewReader(body))
+				})
+
+				It("Response should be 200", func() {
+					server.Handler.ServeHTTP(recorder, request)
+					Expect(recorder.Code).To(gomega.Equal(200))
+
+				})
 			})
 
 		})
 	})
 })
+
+func putCorrectDataUser(user *models.User) {
+
+	date := time.Now()
+	user.IdUser = "esto4es4una4buena4prueba4login"
+	user.Name = "Juan Login"
+	user.Pass = "asdasf123124sdmk09i0342"
+	user.Email = "juan@gmail.com"
+	user.LastLogin = date.Add(time.Minute * (-5))
+	user.CreatedAt = date.AddDate(-1, 0, 0)
+	user.UpdateAt = date.Add(time.Hour * (-5))
+	token, err := models.GenerateToken(user.Name, user.Pass)
+
+	user.Token = token
+	err = user.Save()
+	if err != nil {
+		log.Println("Can't save user for test login", err)
+	}
+}
 
 func DecodeToken(r io.ReadCloser) (*models.Token, error) {
 	defer r.Close()

@@ -10,6 +10,7 @@ import (
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 
+	// We obtain user data, and create our user with them
 	rd := render.New()
 	user, err := DecodeUserData(r.Body)
 	if err != nil {
@@ -23,9 +24,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		rd.JSON(w, http.StatusBadRequest, map[string]string{"token": ""})
 		return
 	}
-	// we show standard output data requests
-	// log.Println("RegisterHandler", r.Method, "path", r.URL.Path, "body", r.Body)
-	// log.Println("RegisterHandler", "unmarshal json", user)
+
 	token, err := models.GenerateToken(user.Name, "#", user.Pass)
 	if err != nil {
 		log.Println("Can't create token!", err)
@@ -34,6 +33,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user.Token = token
+	// keep user data and token we created in the database
 	err = user.Save()
 	if err != nil {
 		log.Println("Can't save the user on the database!")
@@ -41,5 +41,6 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// if everything went correctly, we send the token to the client
 	rd.JSON(w, http.StatusOK, map[string]string{"token": user.Token.Hash})
 }

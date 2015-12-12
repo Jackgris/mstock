@@ -31,6 +31,7 @@ func defineFactories() {
 			factory["CreatedAt"] = date.AddDate(-1, 0, 0)
 			factory["UpdateAt"] = date.Add(time.Hour * (-5))
 		})
+
 	gory.Define("userBad", models.User{},
 		func(factory gory.Factory) {
 			factory["IdUser"] = "esto4es4una4mala4prueba"

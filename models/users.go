@@ -1,6 +1,7 @@
 package models
 
 import (
+	"errors"
 	"log"
 	"time"
 
@@ -24,7 +25,7 @@ type User struct {
 	LastLogin time.Time `json:"last_login"`
 	CreatedAt time.Time `json:"create_at"`
 	UpdateAt  time.Time `json:"update"`
-	Token     Token
+	Token     Token     `json:"token"`
 }
 
 // We will check if the user data are valid
@@ -53,6 +54,16 @@ func (u User) Save() error {
 		panic(err)
 	}
 	defer session.Close()
+
+	if u.Name == "" {
+		return errors.New("User name can't be empty for save on database")
+	}
+	if u.Email == "" {
+		return errors.New("User email can't be empty for save on database")
+	}
+	if u.Pass == "" {
+		return errors.New("User pass can't be empty for save on database")
+	}
 
 	c := session.DB(dbname).C(table)
 	update := bson.M{"$set": u}
