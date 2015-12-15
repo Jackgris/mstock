@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/jackgris/mstock/middleware"
+	"github.com/jackgris/mstock/models"
 	"github.com/unrolled/render"
 
 	"github.com/onsi/ginkgo"
@@ -62,10 +63,11 @@ var _ = ginkgo.Describe("Middleware", func() {
 			Context("With authorization header", func() {
 
 				BeforeEach(func() {
+					token, _ := models.GenerateToken("test")
 					body := ""
 					request, _ = http.NewRequest("GET", "/fake",
 						strings.NewReader(body))
-					request.Header.Add("Authorization", "Bearer test")
+					request.Header.Add("Authorization", "Bearer "+token.Hash)
 				})
 
 				It("Return status code 200", func() {
