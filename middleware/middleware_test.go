@@ -3,6 +3,8 @@ package middleware_test
 import (
 	"log"
 	"net/http"
+	"net/http/httptest"
+	"strings"
 
 	"github.com/jackgris/mstock/middleware"
 	"github.com/unrolled/render"
@@ -23,8 +25,11 @@ var _ = ginkgo.Describe("Middleware", func() {
 	Describe("Server", func() {
 
 		var serve http.Server
+		var request *http.Request
+		var recorder *httptest.ResponseRecorder
 
 		BeforeEach(func() {
+			recorder = httptest.NewRecorder()
 			s := http.NewServeMux()
 			s.Handle("/fake", middleware.AuthMiddleware(fakeHandler{}))
 			serve = http.Server{
@@ -42,15 +47,30 @@ var _ = ginkgo.Describe("Middleware", func() {
 
 			Context("Without authorization header", func() {
 
+				BeforeEach(func() {
+					body := ""
+					request, _ = http.NewRequest("GET", "/fake",
+						strings.NewReader(body))
+				})
+
 				It("Return status code 400", func() {
-					Expect(200).To(gomega.Equal(400))
+					serve.Handler.ServeHTTP(recorder, request)
+					Expect(recorder.Code).To(gomega.Equal(400))
 				})
 			})
 
 			Context("With authorization header", func() {
 
+				BeforeEach(func() {
+					body := ""
+					request, _ = http.NewRequest("GET", "/fake",
+						strings.NewReader(body))
+					request.Header.Add("Authorization", "Bearer test")
+				})
+
 				It("Return status code 200", func() {
-					Expect(400).To(gomega.Equal(200))
+					serve.Handler.ServeHTTP(recorder, request)
+					Expect(recorder.Code).To(gomega.Equal(200))
 				})
 			})
 		})
