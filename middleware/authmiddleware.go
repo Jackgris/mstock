@@ -67,11 +67,25 @@ func AuthMiddleware(handler http.Handler) http.Handler {
 			}
 		}
 
+		// Check for email in the database
+		if email, ok := payload.Claims["sub"].(string); !ok {
+			message := "Error get email from token"
+			log.Println("Middleware auth: ", message)
+			e := errorH{}
+			e.message = message
+			e.ServeHTTP(w, r)
+			return
+		} else {
+			// FIXME unimplented
+			log.Println("Middleware auth email:", email)
+		}
+
 		// If everything is okay, we return response Handler
 		handler.ServeHTTP(w, r)
 	})
 }
 
+// Handler to handle errors in requests that need to authenticacion
 type errorH struct {
 	message string
 }

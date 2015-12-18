@@ -10,7 +10,7 @@ import (
 	"net/http/httptest"
 	"time"
 
-	models "github.com/jackgris/mstock/models"
+	"github.com/jackgris/mstock/models"
 	"github.com/jackgris/mstock/server"
 	"github.com/modocache/gory"
 
@@ -39,12 +39,13 @@ var _ = ginkgo.Describe("Mstock", func() {
 		BeforeEach(func() {
 			dbName = "server_test"
 			dburl := "localhost"
-			session = NewSession(dburl)
+			session = newSession(dburl)
 			serve = server.NewServer()
 			recorder = httptest.NewRecorder()
 		})
 
 		AfterEach(func() {
+			// Clean the database
 			session.DB(dbName).DropDatabase()
 			session.Close()
 		})
@@ -194,7 +195,7 @@ func DecodeToken(r io.ReadCloser) (*models.Token, error) {
 	return &t, err
 }
 
-func NewSession(dburl string) *mgo.Session {
+func newSession(dburl string) *mgo.Session {
 	s, err := mgo.Dial(dburl)
 	if err != nil {
 		panic(err)
