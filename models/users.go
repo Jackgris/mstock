@@ -49,7 +49,7 @@ func (u User) Valid() bool {
 
 // Updated user data, and if it does not exist create a new one
 func (u User) Save() error {
-	session, err := mgo.Dial(dburl)
+	session, err := mgo.Dial(DB_URL)
 	if err != nil {
 		panic(err)
 	}
@@ -65,7 +65,7 @@ func (u User) Save() error {
 		return errors.New("User pass can't be empty for save on database")
 	}
 
-	c := session.DB(dbname).C(table)
+	c := session.DB(DB_NAME).C(table)
 	update := bson.M{"$set": u}
 	_, err = c.UpsertId(u.IdUser, update)
 	return err
@@ -73,12 +73,13 @@ func (u User) Save() error {
 
 // We will return the user data associated with ID
 func (u User) Get() (User, error) {
-	session, err := mgo.Dial(dburl)
+	session, err := mgo.Dial(DB_URL)
 	if err != nil {
 		panic(err)
 	}
 	defer session.Close()
-	c := session.DB(dbname).C(table)
+
+	c := session.DB(DB_NAME).C(table)
 
 	result := User{}
 	err = c.FindId(u.IdUser).One(&result)
@@ -91,12 +92,13 @@ func (u User) Get() (User, error) {
 
 // It will remove the user associated with that ID
 func (u User) Delete() error {
-	session, err := mgo.Dial(dburl)
+	session, err := mgo.Dial(DB_URL)
 	if err != nil {
 		panic(err)
 	}
 	defer session.Close()
-	c := session.DB(dbname).C(table)
+
+	c := session.DB(DB_NAME).C(table)
 
 	return c.Remove(bson.M{"iduser": u.IdUser})
 }

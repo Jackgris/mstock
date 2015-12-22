@@ -1,13 +1,11 @@
 package middleware_test
 
 import (
-	"log"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 
 	"gopkg.in/mgo.v2"
-	"gopkg.in/mgo.v2/bson"
 
 	"github.com/jackgris/mstock/middleware"
 	"github.com/jackgris/mstock/models"
@@ -18,7 +16,6 @@ import (
 	"github.com/onsi/gomega"
 )
 
-var dbName string = "server_test"
 var session *mgo.Session
 
 var _ = ginkgo.Describe("Middleware", func() {
@@ -47,11 +44,12 @@ var _ = ginkgo.Describe("Middleware", func() {
 				Handler: s,
 			}
 			serve.ListenAndServe()
+			models.DB_NAME = "server_test"
 		})
 
 		AfterEach(func() {
 			// Clean the database
-			session.DB(dbName).DropDatabase()
+			session.DB(models.DB_NAME).DropDatabase()
 			session.Close()
 		})
 
@@ -95,11 +93,16 @@ var _ = ginkgo.Describe("Middleware", func() {
 					user = gory.Build("userOk").(*models.User)
 					token, _ := models.GenerateToken("testOk")
 					user.Token = token
-					saveEntity("users", user)
+					user.Save()
 				})
 
 				It("Check if user with token is saved on the database", func() {
-					Expect(1).To(gomega.Equal(2))
+					chkUser := models.User{}
+					chkUser.IdUser = user.IdUser
+					chkUser, err := chkUser.Get()
+
+					Expect(err).To(gomega.BeNil())
+					Expect(chkUser).ShouldNot(gomega.BeZero())
 				})
 			})
 		})
@@ -114,16 +117,7 @@ func (f fakeHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	rd.JSON(w, http.StatusOK, map[string]string{"ok": "true"})
 }
 
-// With this function we will be able to save data for test
-func saveEntity(table string, e interface{}) {
-	c := session.DB(dbName).C(table)
-	insert := bson.M{"$set": e}
-	err := c.Insert(insert)
-	if err != nil {
-		log.Println("Middelware test: saveEntity", err)
-	}
-}
-
+// We create a session in the database to perform the test
 func newSession(dburl string) *mgo.Session {
 	s, err := mgo.Dial(dburl)
 	if err != nil {

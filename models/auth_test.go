@@ -4,9 +4,8 @@ import (
 	"errors"
 	"strings"
 
-	models "github.com/jackgris/mstock/models"
+	"github.com/jackgris/mstock/models"
 
-	"github.com/jackgris/optima/models"
 	"github.com/onsi/ginkgo"
 	"github.com/onsi/gomega"
 )

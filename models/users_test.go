@@ -4,7 +4,7 @@ import (
 	"errors"
 	"time"
 
-	models "github.com/jackgris/mstock/models"
+	"github.com/jackgris/mstock/models"
 
 	"github.com/onsi/ginkgo"
 	"github.com/onsi/gomega"

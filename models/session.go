@@ -1,6 +1,6 @@
 package models
 
-const (
-	dburl  string = "localhost"
-	dbname string = "mstock"
+var (
+	DB_URL  string = "localhost"
+	DB_NAME string = "mstock"
 )
