@@ -4,9 +4,8 @@ import (
 	"errors"
 	"strings"
 
-	models "github.com/jackgris/mstock/models"
+	"github.com/jackgris/mstock/models"
 
-	"github.com/jackgris/optima/models"
 	"github.com/onsi/ginkgo"
 	"github.com/onsi/gomega"
 )
@@ -52,14 +51,9 @@ var _ = ginkgo.Describe("Authentication", func() {
 
 			Context("With invalid data", func() {
 
-				BeforeEach(func() {
-					email = "hola#$&%$/%/#gmail.com"
-					pass = "123hola#%$$#&%$456"
-					data = email + pass
-				})
-
 				It("Invalid token and message error", func() {
-					token, err := models.GenerateToken(data)
+					badData := 1234
+					token, err := models.GenerateToken(badData)
 					errTest := errors.New("invalid data, you can not create the token")
 					Expect(token).To(gomega.BeZero())
 					Expect(err).To(gomega.Equal(errTest))

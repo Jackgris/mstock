@@ -10,8 +10,8 @@ import (
 	"net/http/httptest"
 	"time"
 
-	mstock "github.com/jackgris/mstock"
-	models "github.com/jackgris/mstock/models"
+	"github.com/jackgris/mstock/models"
+	"github.com/jackgris/mstock/server"
 	"github.com/modocache/gory"
 
 	"github.com/onsi/ginkgo"
@@ -32,19 +32,20 @@ var _ = ginkgo.Describe("Mstock", func() {
 
 		var dbName string
 		var session *mgo.Session
-		var server *mstock.Server
+		var serve *server.Server
 		var request *http.Request
 		var recorder *httptest.ResponseRecorder
 
 		BeforeEach(func() {
 			dbName = "server_test"
 			dburl := "localhost"
-			session = NewSession(dburl)
-			server = mstock.NewServer()
+			session = newSession(dburl)
+			serve = server.NewServer()
 			recorder = httptest.NewRecorder()
 		})
 
 		AfterEach(func() {
+			// Clean the database
 			session.DB(dbName).DropDatabase()
 			session.Close()
 		})
@@ -59,7 +60,7 @@ var _ = ginkgo.Describe("Mstock", func() {
 				})
 
 				It("Return a status code of 400", func() {
-					server.Handler.ServeHTTP(recorder, request)
+					serve.Handler.ServeHTTP(recorder, request)
 					Expect(recorder.Code).To(gomega.Equal(400))
 				})
 
@@ -84,7 +85,7 @@ var _ = ginkgo.Describe("Mstock", func() {
 				})
 
 				It("Return a status code of 200", func() {
-					server.Handler.ServeHTTP(recorder, request)
+					serve.Handler.ServeHTTP(recorder, request)
 					Expect(recorder.Code).To(gomega.Equal(200))
 				})
 
@@ -100,7 +101,7 @@ var _ = ginkgo.Describe("Mstock", func() {
 				})
 
 				It("Response need have hash token", func() {
-					server.Handler.ServeHTTP(recorder, request)
+					serve.Handler.ServeHTTP(recorder, request)
 					Expect(recorder.Code).To(gomega.Equal(200))
 					Expect(recorder.HeaderMap["Content-Type"][0]).
 						To(gomega.ContainSubstring("application/json; charset=UTF-8"))
@@ -125,7 +126,7 @@ var _ = ginkgo.Describe("Mstock", func() {
 				})
 
 				It("Response should be 400 with empty input", func() {
-					server.Handler.ServeHTTP(recorder, request)
+					serve.Handler.ServeHTTP(recorder, request)
 					Expect(recorder.Code).To(gomega.Equal(400))
 
 				})
@@ -140,7 +141,7 @@ var _ = ginkgo.Describe("Mstock", func() {
 					body, _ := json.Marshal(user)
 					request, _ = http.NewRequest("POST", "/auth/login",
 						bytes.NewReader(body))
-					server.Handler.ServeHTTP(recorder, request)
+					serve.Handler.ServeHTTP(recorder, request)
 					Expect(recorder.Code).To(gomega.Equal(404))
 				})
 			})
@@ -158,7 +159,7 @@ var _ = ginkgo.Describe("Mstock", func() {
 				})
 
 				It("Response should be 200", func() {
-					server.Handler.ServeHTTP(recorder, request)
+					serve.Handler.ServeHTTP(recorder, request)
 					Expect(recorder.Code).To(gomega.Equal(200))
 
 				})
@@ -194,7 +195,7 @@ func DecodeToken(r io.ReadCloser) (*models.Token, error) {
 	return &t, err
 }
 
-func NewSession(dburl string) *mgo.Session {
+func newSession(dburl string) *mgo.Session {
 	s, err := mgo.Dial(dburl)
 	if err != nil {
 		panic(err)

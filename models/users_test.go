@@ -4,7 +4,7 @@ import (
 	"errors"
 	"time"
 
-	models "github.com/jackgris/mstock/models"
+	"github.com/jackgris/mstock/models"
 
 	"github.com/onsi/ginkgo"
 	"github.com/onsi/gomega"
@@ -16,6 +16,11 @@ var _ = ginkgo.Describe("Users", func() {
 	Describe := ginkgo.Describe
 	It := ginkgo.It
 	Context := ginkgo.Context
+	BeforeEach := ginkgo.BeforeEach
+
+	BeforeEach(func() {
+		models.DB_NAME = "server_test"
+	})
 
 	Describe("Interacting with database", func() {
 
@@ -24,6 +29,7 @@ var _ = ginkgo.Describe("Users", func() {
 				IdUser:    "test1234",
 				Name:      "test",
 				Pass:      "1234",
+				Email:     "test@gmail.com",
 				LastLogin: time.Now(),
 				CreatedAt: time.Now(),
 				UpdateAt:  time.Now(),
