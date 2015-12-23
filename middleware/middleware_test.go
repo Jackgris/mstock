@@ -69,7 +69,7 @@ var _ = ginkgo.Describe("Middleware", func() {
 				})
 			})
 
-			Context("With authorization header", func() {
+			Context("With authorization header but a user who doesn't exist in the database", func() {
 
 				BeforeEach(func() {
 					token, _ := models.GenerateToken("test")
@@ -79,9 +79,9 @@ var _ = ginkgo.Describe("Middleware", func() {
 					request.Header.Add("Authorization", "Bearer "+token.Hash)
 				})
 
-				It("Return status code 200", func() {
+				It("Return status code 400", func() {
 					serve.Handler.ServeHTTP(recorder, request)
-					Expect(recorder.Code).To(gomega.Equal(200))
+					Expect(recorder.Code).To(gomega.Equal(400))
 				})
 			})
 
@@ -91,9 +91,14 @@ var _ = ginkgo.Describe("Middleware", func() {
 
 				BeforeEach(func() {
 					user = gory.Build("userOk").(*models.User)
-					token, _ := models.GenerateToken("testOk")
+					token, _ := models.GenerateToken(user.Email + "#" + user.Pass)
 					user.Token = token
 					user.Save()
+
+					body := ""
+					request, _ = http.NewRequest("GET", "/fake",
+						strings.NewReader(body))
+					request.Header.Add("Authorization", "Bearer "+token.Hash)
 				})
 
 				It("Check if user with token is saved on the database", func() {
@@ -103,6 +108,41 @@ var _ = ginkgo.Describe("Middleware", func() {
 
 					Expect(err).To(gomega.BeNil())
 					Expect(chkUser).ShouldNot(gomega.BeZero())
+				})
+
+				It("Return status code 200", func() {
+					serve.Handler.ServeHTTP(recorder, request)
+					Expect(recorder.Code).To(gomega.Equal(200))
+				})
+			})
+
+			Context("With a user who does not exist in the database", func() {
+
+				var user *models.User
+
+				BeforeEach(func() {
+					user = gory.Build("userBad").(*models.User)
+					token, _ := models.GenerateToken("testOk")
+					user.Token = token
+
+					body := ""
+					request, _ = http.NewRequest("GET", "/fake",
+						strings.NewReader(body))
+					request.Header.Add("Authorization", "Bearer "+token.Hash)
+				})
+
+				It("Check if user with token is saved on the database", func() {
+					chkUser := models.User{}
+					chkUser.IdUser = user.IdUser
+					chkUser, err := chkUser.Get()
+
+					Expect(err).ShouldNot(gomega.BeNil())
+					Expect(chkUser).Should(gomega.BeZero())
+				})
+
+				It("Return status code 400", func() {
+					serve.Handler.ServeHTTP(recorder, request)
+					Expect(recorder.Code).To(gomega.Equal(400))
 				})
 			})
 		})

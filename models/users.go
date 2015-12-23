@@ -102,3 +102,24 @@ func (u User) Delete() error {
 
 	return c.Remove(bson.M{"iduser": u.IdUser})
 }
+
+// We are going to search for users in the database,
+// given through an e-mail
+func FindUsers(email string) ([]User, error) {
+	session, err := mgo.Dial(DB_URL)
+	if err != nil {
+		panic(err)
+	}
+	defer session.Close()
+	c := session.DB(DB_NAME).C(table)
+
+	query := bson.M{"email": email}
+	result := []User{}
+	err = c.Find(query).All(&result)
+	if err != nil {
+		log.Println("Find user", err)
+		return []User{}, err
+	}
+
+	return result, err
+}

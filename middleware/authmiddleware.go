@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/dgrijalva/jwt-go"
-	models "github.com/jackgris/mstock/models"
+	"github.com/jackgris/mstock/models"
 	"github.com/unrolled/render"
 )
 
@@ -76,8 +76,32 @@ func AuthMiddleware(handler http.Handler) http.Handler {
 			e.ServeHTTP(w, r)
 			return
 		} else {
-			// FIXME unimplented
-			log.Println("Middleware auth email:", email)
+			emails := strings.Split(email, "#")
+			if len(emails) < 1 {
+				message := "can't split email and pass"
+				e := errorH{}
+				e.message = message
+				e.ServeHTTP(w, r)
+				return
+			}
+
+			email = emails[0]
+			users, err := models.FindUsers(email)
+
+			if err != nil {
+				message := "error in the database: " + err.Error()
+				e := errorH{}
+				e.message = message
+				e.ServeHTTP(w, r)
+				return
+			}
+			if len(users) == 0 {
+				message := "No users found"
+				e := errorH{}
+				e.message = message
+				e.ServeHTTP(w, r)
+				return
+			}
 		}
 
 		// If everything is okay, we return response Handler
