@@ -46,7 +46,8 @@ func NewServer() *Server {
 
 // Will run the server
 func (s *Server) Run() {
-	s.ListenAndServe()
+	err := s.ListenAndServe()
+	log.Println("Trouble starting the server:" + err)
 }
 
 // We use this function to verify that the route of the
