@@ -28,7 +28,7 @@ angular
                 }
             }).     
             when('/registro', {
-                templateUrl: '/register.html',
+                templateUrl: '/partials/register.html',
                 controller: 'SignUpController',
                 resolve: {
                     isLoginListAdvertiser: isLoginListAdvertiser
@@ -38,40 +38,47 @@ angular
                 templateUrl: null,
                 controller: 'LogoutController'
             }).
+            when('/panel', {
+                templateUrl: '/partials/panel.html',
+                controller: 'PanelController',
+                resolve: {
+                    loginRequired: loginRequired
+                }
+            }).
             otherwise({
                 redirectTo: '/'
             });
   })
-//   .run(function($rootScope, $auth, $location) {
-//       $rootScope.logout = function(){
-//             $auth.logout()
-//                 .then(function() {
-//                     // Desconectamos al usuario y lo redirijimos
-//                     $location.path("/")
-//                 });
-//         }
+  .run(function($rootScope, $auth, $location) {
+      $rootScope.logout = function(){
+            $auth.logout()
+                .then(function() {
+                    // Desconectamos al usuario y lo redirijimos
+                    $location.path("/")
+                });
+        }
 
-// })
+})
 ;
 
 // Redirect authenticated users from section of register or authentication
 function isLoginListAdvertiser($q, $location, $auth){
-    // var deferred = $q.defer();
-    // if ($auth.isAuthenticated()) {
-    //     $location.path('/home');
-    // } else {
-    //     deferred.resolve();
-    // }
-    // return deferred.promise;
+    var deferred = $q.defer();
+    if ($auth.isAuthenticated()) {
+        $location.path('/panel');
+    } else {
+        deferred.resolve();
+    }
+    return deferred.promise;
 }
 
 // Redirect unauthenticated users to the login state
 function loginRequired($q, $location, $auth){
-    // var deferred = $q.defer();
-    // if ($auth.isAuthenticated()) {
-    //     deferred.resolve();
-    // } else {
-    //     $location.path('/login');
-    // }
-    // return deferred.promise;
+    var deferred = $q.defer();
+    if ($auth.isAuthenticated()) {
+        deferred.resolve();
+    } else {
+        $location.path('/login');
+    }
+    return deferred.promise;
 }

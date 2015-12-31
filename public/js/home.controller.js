@@ -3,10 +3,11 @@ angular
     .controller('HomeController', HomeController)
     .controller('LoginController', LoginController)
     .controller('LogoutController', LogoutController)
-    .controller('SignUpController', SignUpController);
+    .controller('SignUpController', SignUpController)
+    .controller('PanelController', PanelController);
 
 function HomeController($log){
-    $log.info('Test');
+    $log.info('Home page');
 }
 
 function SignUpController($auth, $location, $scope, $log) {  
@@ -21,7 +22,7 @@ function SignUpController($auth, $location, $scope, $log) {
             $log.info('Se realizo el registro correctamente');
             // Si se ha registrado correctamente,
             // Podemos redirigirle a otra parte
-            $location.path("/home");
+            $location.path("/panel");
         })
         .catch(function(response) {
             // Si ha habido errores, llegaremos a esta función
@@ -41,7 +42,7 @@ function LoginController($log, $auth, $location, $scope) {
             // Si se ha logueado correctamente, lo tratamos aquí.
             // Podemos también redirigirle a una ruta
             $log.info('Se realizo el login correctamente');
-            $location.path("/home")
+            $location.path("/panel")
         })
         .catch(function(response){
             // Si ha habido errores llegamos a esta parte
@@ -57,4 +58,8 @@ function LogoutController($auth, $location) {
             // Desconectamos al usuario y lo redirijimos
             $location.path("/")
         });
+}
+
+function PanelController(){
+    // FIXME unimplemented
 }

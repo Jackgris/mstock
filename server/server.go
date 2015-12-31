@@ -24,7 +24,7 @@ var templates = template.Must(template.ParseFiles("templates/home.html"))
 
 // We will verify the routes from which are going to be possible to
 // access our server
-var validPath = regexp.MustCompile("^/(auth)/([a-zA-Z0-9]+)$")
+var validPath = regexp.MustCompile("^/(auth|registro|logout|panel|login)/([a-zA-Z0-9]+)$")
 
 // NewServer it will create a server with all necessary
 // settings to function properly

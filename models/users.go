@@ -20,7 +20,7 @@ const table string = "users"
 type User struct {
 	IdUser    string    `json:"id_user"`
 	Name      string    `json:"name"`
-	Pass      string    `json:"pass"`
+	Pass      string    `json:"password"`
 	Email     string    `json:"email"`
 	LastLogin time.Time `json:"last_login"`
 	CreatedAt time.Time `json:"create_at"`
@@ -28,10 +28,12 @@ type User struct {
 	Token     Token     `json:"token"`
 }
 
-// We will check if the user data are valid
-func (u User) Valid() bool {
+// We will check if the user data are valid, name is required only on register
+func (u User) Valid(name bool) bool {
 	v := validation.Validation{}
-	v.Required(u.Name, "name")
+	if name {
+		v.Required(u.Name, "name")
+	}
 	v.MaxSize(u.Name, 20, "nameMax")
 	v.Required(u.Pass, "pass")
 	v.MaxSize(u.Pass, 30, "passMax")

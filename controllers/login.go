@@ -19,7 +19,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !user.Valid() {
+	if !user.Valid(false) {
 		log.Println("User data in login are invalid")
 		rd.JSON(w, http.StatusBadRequest, map[string]string{"token": ""})
 		return

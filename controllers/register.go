@@ -19,7 +19,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !user.Valid() {
+	if !user.Valid(true) {
 		log.Println("User data are invalid!")
 		rd.JSON(w, http.StatusBadRequest, map[string]string{"token": ""})
 		return
